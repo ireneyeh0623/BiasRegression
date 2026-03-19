@@ -109,7 +109,8 @@ else:
         # 取得公司名稱 (Ticker 物件)
         # ticker_info = yf.Ticker(search_id) #先拿掉避免觸發 YFRateLimitError
         # long_name = ticker_info.info.get('longName', search_id)  #先拿掉避免觸發 YFRateLimitError
-        st.write(f"### {search_id} - {long_name}")
+        # st.write(f"### {search_id} - {long_name}") #先拿掉避免觸發 YFRateLimitError
+        st.write(f"### {search_id}")
 
         # --- 1. 處理 yfinance 可能產生的多層索引 (MultiIndex) ---
         # 如果欄位是多層的（例如包含 Ticker 名稱），則只取最內層的 Open, High, Low, Close
