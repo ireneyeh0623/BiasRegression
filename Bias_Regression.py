@@ -122,9 +122,30 @@ else:
         # 公式：(收盤價 / MA - 1) * 100
         df['Bias'] = ((df['Close'] / df['MA']) - 1) * 100
         
-        # 移除包含 NaN 的列 (前 n 天沒有 MA)
-        df = df.dropna(subset=['Bias']).reset_index(drop=True)
+        # A. 計算移動平均線 (MA)
+        # 使用扁平化後的 Close_1D 確保計算準確
+        df['MA'] = df['Close_1D'].rolling(window=ma_period).mean()
 
+        # B. 定義乖離率 (Bias Ratio)
+        df['Bias'] = ((df['Close_1D'] / df['MA']) - 1) * 100
+        
+        # --- 關鍵修正：同時處理 NaN 與 Inf (無限大) ---
+        # 1. 將無限大替換為 NaN 2. 刪除所有 NaN
+        df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=['Bias']).reset_index(drop=True)
+
+        # 增加防錯機制：如果過濾後資料太少，則不進行回歸
+        if len(df) < 10:
+            st.error(f"❌ 目前日期範圍內的有效資料太少（少於 10 筆），無法進行 {ma_period} 天回歸分析。請加長起始日期。")
+        else:
+            # C. 線性回歸計算
+            X = np.array(df.index).reshape(-1, 1)
+            Y = df['Bias'].values.reshape(-1, 1)
+            
+            model = LinearRegression()
+            model.fit(X, Y) # 現在這裡不會再噴 NaN 錯誤了！
+            
+            df['Bias_Reg'] = model.predict(X)
+    
         # C. 線性回歸計算 (針對乖離率)
         # X 為時間索引，Y 為乖離率
         X = np.array(df.index).reshape(-1, 1)
