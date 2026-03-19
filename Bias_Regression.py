@@ -210,13 +210,41 @@ else:
         fig.update_layout(
             height=600,
             template=chart_template,
-            yaxis_title="乖離率 (%)",
-            xaxis_title="日期",
             hovermode="x unified",
             paper_bgcolor=bg_color,
             plot_bgcolor=bg_color,
-            font=dict(color=font_color),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5)
+            # 全域字體設定：加深顏色
+            font=dict(color=font_color, size=14), 
+            
+            xaxis=dict(
+                type='category', 
+                color=font_color,
+                # X 軸刻度字體加深加粗
+                tickfont=dict(color=font_color, size=12), 
+                title=dict(text="日期", font=dict(color=font_color, size=14)),
+                nticks=8,
+                showgrid=False,   # 消除垂直格線
+                zeroline=False    # 消除零軸線
+            ),
+            
+            yaxis=dict(
+                color=font_color,
+                # Y 軸刻度字體加深加粗
+                tickfont=dict(color=font_color, size=12), 
+                title=dict(text="乖離率 (%)", font=dict(color=font_color, size=14)),
+                showgrid=False,   # 消除水平格線
+                zeroline=False    # 消除零軸線
+            ),
+            
+            legend=dict(
+                orientation="h", 
+                yanchor="bottom", 
+                y=1.02, 
+                xanchor="center", 
+                x=0.5,
+                # 圖例字體加深
+                font=dict(color=font_color, size=12) 
+            )
         )
 
         st.plotly_chart(fig, use_container_width=True)
