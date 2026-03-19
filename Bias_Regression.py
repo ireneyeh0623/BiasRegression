@@ -20,7 +20,7 @@ start_date = st.sidebar.date_input("起始日期", datetime(2020, 1, 1))
 end_date = st.sidebar.date_input("結束日期", datetime.now())
 
 # 移動平均線週期選擇
-ma_period = st.sidebar.radio("移動平均線週期", [100, 265], index=0)
+ma_period = st.sidebar.radio("移動平均線週期", [100, 260], index=0)
 
 # 圖表主題選擇
 theme_choice = st.sidebar.radio("圖表主題(對應網頁背景)", ["亮色(白色背景)", "深色(深色背景)"])
@@ -99,7 +99,7 @@ st.write(f"## 📈 David 乖離率線性回歸")
 
 if not calculate_btn:
     # 初始提示訊息
-    st.info("💡 請點開左上角選單 [ > ] 設定參數後按「開始計算」。")
+    st.info("💡 請點開左上角選單 [ > ] 在左側面板設定參數後按「開始計算」即可產出圖表")
 else:
     # 抓取資料
     search_id = f"{stock_id}.TW" if stock_id.isdigit() else stock_id
