@@ -133,7 +133,9 @@ else:
             st.stop()
 
         # [新增] 格式化日期字串，用於 X 軸顯示
-        df['Date_Str'] = df['Date'].dt.strftime('%b %d %Y')
+        # --- 格式改為 YYYY-MM-DD ---
+        # %Y (四位數年份), %m (兩位數月份), %d (兩位數日期)
+        df['Date_Str'] = df['Date'].dt.strftime('%Y-%m-%d')
         
         # --- 3. 開始計算移動平均與乖離率 ---
         # 使用剛建立的 Close_1D 確保欄位名稱正確
@@ -194,17 +196,17 @@ else:
         # F. 繪圖：使用 Plotly
         fig = go.Figure()
 
-        # 實際乖離率曲線 (主線)
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias'], name='實際乖離率', line=dict(color='#17BECF', width=2)))
+        # 1. 實際乖離率曲線 (主線) - 修改 x 為 df['Date_Str']
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias'], name='實際乖離率', line=dict(color='#17BECF', width=2)))
 
-        # 線性回歸線 (中心線)
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias_Reg'], name='回歸中線', line=dict(color='orange', dash='dash')))
+        # 2. 線性回歸線 (中心線) - 修改 x 為 df['Date_Str']
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias_Reg'], name='回歸中線', line=dict(color='orange', dash='dash')))
 
-        # 標準差軌道線
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias_P2SD'], name='+2SD 極端樂觀', line=dict(color='red', width=1, dash='dot')))
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias_P1SD'], name='+1SD 樂觀', line=dict(color='pink', width=1, dash='dot')))
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias_M1SD'], name='-1SD 悲觀', line=dict(color='lightgreen', width=1, dash='dot')))
-        fig.add_trace(go.Scatter(x=df['Date'], y=df['Bias_M2SD'], name='-2SD 極端悲觀', line=dict(color='green', width=1, dash='dot')))
+        # 3. 標準差軌道線 - 全部修改 x 為 df['Date_Str']
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias_P2SD'], name='+2SD 極端樂觀', line=dict(color='red', width=1, dash='dot')))
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias_P1SD'], name='+1SD 樂觀', line=dict(color='pink', width=1, dash='dot')))
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias_M1SD'], name='-1SD 悲觀', line=dict(color='lightgreen', width=1, dash='dot')))
+        fig.add_trace(go.Scatter(x=df['Date_Str'], y=df['Bias_M2SD'], name='-2SD 極端悲觀', line=dict(color='green', width=1, dash='dot')))
 
         # 圖表佈局設定
         fig.update_layout(
