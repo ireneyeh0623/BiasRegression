@@ -111,9 +111,33 @@ else:
         long_name = ticker_info.info.get('longName', search_id)
         st.write(f"### {search_id} - {long_name}")
 
-        df = data.copy().reset_index()
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
+        # --- 1. 處理 yfinance 可能產生的多層索引 (MultiIndex) ---
+        # 如果欄位是多層的（例如包含 Ticker 名稱），則只取最內層的 Open, High, Low, Close
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = data.columns.get_level_values(0)
+        
+        # 重設索引，將 Date 變成一個普通的欄位
+        df = data.reset_index()
+
+        # --- 2. 核心修正：安全地建立運算用的欄位 ---
+        # 直接從 df 中抓取欄位，避免使用 values.flatten() 導致的維度不符
+        try:
+            # 優先嘗試標準名稱
+            df['Close_1D'] = df['Close']
+            df['High_1D'] = df['High']
+            df['Low_1D'] = df['Low']
+            df['Open_1D'] = df['Open']
+        except KeyError:
+            # 如果抓不到 Close 欄位則停止執行並報錯
+            st.error("找不到 'Close' 欄位，可能是資料下載格式不符，請重新嘗試。")
+            st.stop()
+
+        # [新增] 格式化日期字串，用於 X 軸顯示
+        df['Date_Str'] = df['Date'].dt.strftime('%b %d %Y')
+        
+        # --- 3. 開始計算移動平均與乖離率 ---
+        # 使用剛建立的 Close_1D 確保欄位名稱正確
+        df['MA'] = df['Close_1D'].rolling(window=ma_period).mean()
 
         # A. 計算移動平均線 (MA)
         df['MA'] = df['Close'].rolling(window=ma_period).mean()
