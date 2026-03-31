@@ -16,11 +16,11 @@ st.sidebar.header("查詢設定")
 stock_id = st.sidebar.text_input("股票代號(如2330.TW或AAPL)", "2330.TW")
 
 # 日期選擇
-start_date = st.sidebar.date_input("起始日期", datetime(2020, 1, 1))
+start_date = st.sidebar.date_input("起始日期", datetime(2019, 1, 1))
 end_date = st.sidebar.date_input("結束日期", datetime.now())
 
 # 移動平均線週期選擇
-ma_period = st.sidebar.radio("移動平均線週期", [100, 260], index=0)
+ma_period = st.sidebar.radio("移動平均線週期", [100, 260], index=1)
 
 # 圖表主題選擇
 theme_choice = st.sidebar.radio("圖表主題(對應網頁背景)", ["亮色(白色背景)", "深色(深色背景)"])
@@ -139,21 +139,11 @@ else:
         df['Date_Str'] = df['Date'].dt.strftime('%Y-%m-%d')
         
         # --- 3. 開始計算移動平均與乖離率 ---
-        # 使用剛建立的 Close_1D 確保欄位名稱正確
-        df['MA'] = df['Close_1D'].rolling(window=ma_period).mean()
-
         # A. 計算移動平均線 (MA)
-        df['MA'] = df['Close'].rolling(window=ma_period).mean()
+        df['MA'] = df['Close_1D'].rolling(window=ma_period).mean()
 
         # B. 定義乖離率 (Bias Ratio)
         # 公式：(收盤價 / MA - 1) * 100
-        df['Bias'] = ((df['Close'] / df['MA']) - 1) * 100
-        
-        # A. 計算移動平均線 (MA)
-        # 使用扁平化後的 Close_1D 確保計算準確
-        df['MA'] = df['Close_1D'].rolling(window=ma_period).mean()
-
-        # B. 定義乖離率 (Bias Ratio)
         df['Bias'] = ((df['Close_1D'] / df['MA']) - 1) * 100
         
         # --- 關鍵修正：同時處理 NaN 與 Inf (無限大) ---
@@ -163,23 +153,15 @@ else:
         # 增加防錯機制：如果過濾後資料太少，則不進行回歸
         if len(df) < 10:
             st.error(f"❌ 目前日期範圍內的有效資料太少（少於 10 筆），無法進行 {ma_period} 天回歸分析。請加長起始日期。")
-        else:
-            # C. 線性回歸計算
-            X = np.array(df.index).reshape(-1, 1)
-            Y = df['Bias'].values.reshape(-1, 1)
-            
-            model = LinearRegression()
-            model.fit(X, Y) # 現在這裡不會再噴 NaN 錯誤了！
-            
-            df['Bias_Reg'] = model.predict(X)
-    
+            st.stop()
+
         # C. 線性回歸計算 (針對乖離率)
         # X 為時間索引，Y 為乖離率
         X = np.array(df.index).reshape(-1, 1)
         Y = df['Bias'].values.reshape(-1, 1)
         model = LinearRegression()
         model.fit(X, Y)
-        
+
         # 乖離率回歸值 (Middle Line)
         df['Bias_Reg'] = model.predict(X)
 
