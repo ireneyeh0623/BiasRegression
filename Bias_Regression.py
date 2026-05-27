@@ -120,6 +120,17 @@ else:
         # 重設索引，將 Date 變成一個普通的欄位
         df = data.reset_index()
 
+        # --- 相容不同版本 yfinance：reset_index() 後日期欄位可能為 'Date' 或 'Datetime' ---
+        if 'Date' not in df.columns:
+            if 'Datetime' in df.columns:
+                df = df.rename(columns={'Datetime': 'Date'})
+            else:
+                # 自動偵測 datetime 類型欄位並命名為 'Date'
+                for col in df.columns:
+                    if pd.api.types.is_datetime64_any_dtype(df[col]):
+                        df = df.rename(columns={col: 'Date'})
+                        break
+
         # --- 2. 核心修正：安全地建立運算用的欄位 ---
         # 直接從 df 中抓取欄位，避免使用 values.flatten() 導致的維度不符
         try:
@@ -240,7 +251,7 @@ else:
         last_row = df.iloc[-1]
         
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric("最後收盤價", f"{last_row['Close']:.2f}")
+        col1.metric("最後收盤價", f"{last_row['Close_1D']:.2f}")
         col2.metric("目前乖離率", f"{last_row['Bias']:.2f}%")
         col3.metric("回歸中線值", f"{last_row['Bias_Reg']:.2f}%")
         col4.metric("標準差 (SD)", f"{sd_val:.2f}%")
