@@ -13,7 +13,7 @@ st.set_page_config(page_title="David 乖離率線性回歸", layout="wide")
 st.sidebar.header("查詢設定")
 
 # 股票代號輸入
-stock_id = st.sidebar.text_input("股票代號(輸入數字如2330，輸入文字如AAPL)", "2330")
+stock_id = st.sidebar.text_input("股票代號(如2330或AAPL)", "2330")
 
 # 日期選擇
 start_date = st.sidebar.date_input("起始日期", datetime(2019, 1, 1))
