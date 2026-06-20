@@ -13,7 +13,7 @@ st.set_page_config(page_title="David 乖離率線性回歸", layout="wide")
 st.sidebar.header("查詢設定")
 
 # 股票代號輸入
-stock_id = st.sidebar.text_input("股票代號(如2330.TW或AAPL)", "2330.TW")
+stock_id = st.sidebar.text_input("股票代號(輸入數字如2330，輸入文字如AAPL)", "2330")
 
 # 日期選擇
 start_date = st.sidebar.date_input("起始日期", datetime(2019, 1, 1))
@@ -101,9 +101,13 @@ if not calculate_btn:
     # 初始提示訊息
     st.info("💡 請點開左上角選單 [ >> ] 在左側面板設定參數後，按「開始計算」即可產出圖表")
 else:
-    # 抓取資料
-    search_id = f"{stock_id}.TW" if stock_id.isdigit() else stock_id
-    data = yf.download(search_id, start=start_date, end=end_date, auto_adjust=True)
+    # 抓取資料：依序嘗試原始代號 → 加 .TW → 加 .TWO
+    raw_id = stock_id.strip()
+    for candidate in [raw_id, f"{raw_id}.TW", f"{raw_id}.TWO"]:
+        search_id = candidate
+        data = yf.download(search_id, start=start_date, end=end_date, auto_adjust=True)
+        if not data.empty:
+            break
     
     if not data.empty:
         # 取得公司名稱 (Ticker 物件)
