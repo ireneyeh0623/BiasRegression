@@ -103,7 +103,8 @@ if not calculate_btn:
 else:
     # 抓取資料：依序嘗試原始代號 → 加 .TW → 加 .TWO
     raw_id = stock_id.strip()
-    for candidate in [raw_id, f"{raw_id}.TW", f"{raw_id}.TWO"]:
+    candidates = [raw_id, f"{raw_id}.TW", f"{raw_id}.TWO"]
+    for candidate in candidates:
         search_id = candidate
         data = yf.download(search_id, start=start_date, end=end_date, auto_adjust=True)
         if not data.empty:
@@ -261,4 +262,4 @@ else:
         col4.metric("標準差 (SD)", f"{sd_val:.2f}%")
 
     else:
-        st.error("找不到股票資料，請檢查代號或日期設定。")
+        st.error(f"找不到股票資料（已嘗試：{', '.join(candidates)}），請檢查代號或日期。")
